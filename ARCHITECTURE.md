@@ -1,0 +1,23 @@
+# Architecture
+
+## Simulation and rendering
+
+`src/game/config.ts` contains the map geometry, island locations, and all balance values. `simulation.ts` holds player, enemy, projectile, effect, score, and timer state. `stepGame` advances these rules by seconds and has no Pixi or React dependency. The Pixi ticker in `BattleCanvas.tsx` uses a fixed 1/60-second step with a bounded frame accumulator. The simulation skips every step while paused; blur or tab hide clears held input. `controls.ts` combines keyboard and pointer-held touch actions, and removes its listeners at unmount.
+
+`render.ts` loads the three ship atlases, draws islands and health bars, and maps each ship heading to one of sixteen atlas frames. Its camera follows the player. The map is a 56×56 isometric diamond, larger than the viewport. `visible_tiles.ts` inverts the projection to find tile candidates, then checks which rectangles intersect the camera with a small margin. `render_ocean.ts` creates those sprites, removes tiles and wave animations outside that view, and retains the original projection. `simulation.ts` emits temporary foam behind boats in proportion to actual travel; `render.ts` draws the foam beneath islands and ships. Movement stays inside the diamond; island ellipses block ships and projectiles. Chasers approach and explode on contact. Shooters approach to range and fire at the player. Projectiles have a lifetime, one-hit damage, and cooldowns. Destroyed enemies are removed; only a player projectile kill adds a point. Waves, cannon flashes, hits, and explosions are visual effects. Texture loading has a retryable error state.
+
+`simulation.ts` also queues simple cannon, hit, and explosion sound cues without changing combat rules. `BattleCanvas.tsx` drains those cues after simulation steps and owns a small `audio.ts` controller for WAV voice reuse, ambient playback, mute, pause, and cleanup. Browser playback starts after the player interacts with the game. HUD icon PNGs are regular DOM images, so the accessible text labels remain intact.
+
+React owns the menu, options, semantic HUD, pause dialog, touch buttons, result, ranking, and history. The HUD receives snapshots at most five times per second rather than rerendering at frame rate. A finished simulation calls the typed match completion context exactly once, then `App` saves and submits the record. Leaving combat unmounts the renderer and abandons the session. Pixi objects, listeners, held inputs, and ticker are cleaned up on exit, reload, and Strict Mode effect cleanup. The original starter `GameCanvas.tsx` and `ship.ts` are preserved; the new flow uses `BattleCanvas.tsx`.
+
+## Local data and remote-looking data
+
+`settings.ts` validates and persists the two visible options. Each game stores a copy on creation. `network/storage.ts` stores a device-specific player ID, last result, and pending records. A match record is written locally before Axios sends it to `POST /api/history`. The MSW handler stores matches and returns the existing one for a repeated ID; a timeout after storage is recoverable without a duplicate. Fixtures represent other players.
+
+`network/contracts.ts` defines match and page types. `client.ts` uses Axios with a three-second timeout. TanStack Query keys include ranking options and page, or player ID and history page. List queries pass AbortSignal to Axios; canceled old responses cannot overwrite current data. Successful registration invalidates both lists. Reopening a tab refetches stale data. List failures and pending registrations never block gameplay. Scenario selection resets deterministic latency sequence; reset restores fixtures and clears records. The committed MSW service worker handles `/api` in development and production.
+
+## Tests and limits
+
+Node tests exercise movement bounds, islands, spawn types, weapons, scoring, match ending, options, pagination, and idempotency. Playwright tests use desktop and mobile Chromium, verify application navigation and record flow, and keep three versioned desktop screenshot baselines. Development only `?test=1` exposes a read-only snapshot and step control so gameplay tests execute the real rules deterministically without waiting for a full minute. This switch is absent from production builds.
+
+Audio, public deployment, and a measured three-minute optimized-build performance report remain to be done. Player and enemy hulls use circles against elliptic island footprints; visual shoreline detail is decorative and not a separate collision mesh. Opponents do not collide with each other. The visible arena and HUD resize with the browser without changing simulation coordinates.
