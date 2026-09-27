@@ -1,72 +1,300 @@
 # Pirate Battle
 
-A single-player naval shooter built with React, TypeScript, PixiJS, Axios, TanStack Query, and MSW. Sail an isometric tiled sea, fight Chasers and Shooters, and record finished voyages in a locally mocked ranking and match history.
+A small naval combat game built with **React, TypeScript and PixiJS** for the Jungle Gaming Frontend Game Developer challenge.
 
-## Run
+The game takes place in an isometric ocean arena where the player controls a pirate ship, fights different enemy types, avoids islands and survives until the match timer ends.
 
-Requires Node.js 24 or newer. From a clean checkout:
+## Live Demo
 
-```sh
-npm ci
+https://pirate-battle-omega.vercel.app
+
+## Features
+
+- Isometric naval combat
+- 16-direction ship rendering
+- Player ship with:
+  - front cannon
+  - port broadside
+  - starboard broadside
+- Multiple enemy behaviors
+  - Chaser
+  - Shooter
+- Enemy spawning during the match
+- Islands and collision handling
+- Health and match HUD
+- Configurable game session duration
+- Configurable enemy spawn interval
+- Pause support
+- Automatic pause when browser focus is lost
+- Particle and combat effects
+- Main menu
+- Options screen
+- Result screen
+- Ranking
+- Match history
+- Persistent player and match data
+- Desktop and mobile controls
+- Simulated backend using MSW
+- Network failure scenarios for testing
+- Axios API client
+- TanStack Query integration
+
+The project uses a combination of **assets supplied with the challenge**, custom sprites and procedural visual elements.
+
+## Running Locally
+
+Requirements:
+
+- Node.js 22+
+- npm
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-For an optimized build, run `npm run build` then `npm run preview`. No environment variables or private API services are needed. The committed `public/mockServiceWorker.js` starts before React renders, including in the published build. Host at a secure HTTPS origin (or localhost) and serve the worker at the site's root.
+Build the production version:
 
-## Controls
-
-| Action | Keyboard | Touch |
-| --- | --- | --- |
-| Sail forward | W or Up | Sail |
-| Steer | A / D or Left / Right | Turn left / Turn right |
-| Bow cannon | J | Bow cannon |
-| Three-shot port broadside | Q | Port cannons |
-| Three-shot starboard broadside | E | Starboard cannons |
-| Pause / resume | Space or Escape; resume also has a button | Pause / Resume |
-
-Steering, movement, and firing can happen together. Switching tabs or losing focus pauses the simulation; resume requires an explicit action. Leaving combat abandons the match without adding a record. Desktop and mobile portrait/landscape are supported; the camera follows the ship through a 56×56 isometric sea. **Sound on / Sound off** in combat toggles cannon, impact, explosion, and quiet ocean ambience audio. The ocean pauses with the match; if the browser blocks automatic playback, the first gameplay input starts it.
-
-The ocean creates only tiles intersecting the camera view, with a small margin while panning, and removes tiles and waves when they leave it. Moving player and enemy boats leave short lived foam behind their sterns. The simulation tracks wake distance so standing still does not produce particles; the renderer skips foam outside the view.
-
-Options persist across refresh. **Game session time** accepts whole seconds from 60 through 180. **Enemy spawn time** accepts whole seconds from 2 through 30. A match copies both options at its start. The result persists locally after completion; Play Again creates fresh health, score, enemies, and timers. Player and enemy ships each have 16 direction frames (22.5° per frame). The three 4×4 PNG atlases in `src/assets/ships/` can be regenerated with `python3 scripts/generate_ships.py` (Pillow is only needed for regeneration). The ship artwork is original to this project; the water tiles came with the starter. The HUD icons and WAV sounds come from the challenge repository. Exact source paths and license status are in [`ASSET_CREDITS.md`](ASSET_CREDITS.md).
-
-All balancing constants, map size, enemy behavior, projectile settings, and island locations are in `src/game/config.ts`. Only the two options above are exposed in the UI.
-
-## Network scenarios
-
-Open **Network scenarios** on the menu. Select a scenario, revisit Ranking or Match History, and use **Reset network data and records** to restore fixtures, clear pending submissions, and clear the last result.
-
-| Scenario | Effect |
-| --- | --- |
-| success | Stored matches and eight fixture opponents |
-| empty | Empty ranking and history responses |
-| multiple-pages | Paginated fixtures (24 initial matches) |
-| slow | 1.8-second responses |
-| variable-latency | Repeating delays: 150, 900, 350, 1100 ms |
-| out-of-order | Alternating 1200 and 100 ms responses |
-| timeout | Response delayed past Axios's 3-second timeout |
-| connection-failure | Network error |
-| http-400 / http-500 | HTTP error responses |
-| ranking-error / history-error | Failure restricted to one list |
-| post-timeout | Store the match before the first response times out; retry returns that record |
-| offline | HTTP 503 for lists and registration |
-
-Scenario selection and confirmed records persist through refresh. A finished match is queued before the first request; the player can start another while it is pending. To exercise recovery, select **offline**, finish a match, refresh, switch to **success**, then choose **Retry oldest pending record**. The match ID makes retries idempotent. Rankings compare matches using the same two timing options and sort by score descending, duration ascending, completion time ascending, then match ID.
-
-## Checks
-
-```sh
-npm run typecheck
-npm run lint
-npm run test:unit
-npx playwright install chromium
-npm run test:e2e
+```bash
 npm run build
 ```
 
-Playwright runs desktop and mobile Chromium in isolated browser contexts. The game E2E tests use `?test=1` in development to observe state and advance the real simulation one fixed step at a time; they still send keyboard/touch input through the actual controls. Screenshot baselines are in `tests/e2e/visual.spec.ts-snapshots/`. Failed tests retain traces under `test-results/`; `playwright-report/` contains the latest HTML report. A copy of the passing report and a verification summary are included under `reports/`; generated scratch reports are ignored by git. `PIRATE_CHROMIUM=/absolute/path/to/chromium npm run test:e2e` can select a locally installed compatible Chromium binary.
+Preview the production build:
 
-## Remaining work
+```bash
+npm run preview
+```
 
-The game uses authored procedural sprites and simple collision shapes. Sound, a public deployment, and the challenge's full three-minute optimized-build profiling report are not included. Headless screenshot baselines can vary by fonts and GPU across operating systems. The untouched original `GameCanvas.tsx` and `ship.ts` remain as starter references; the playable game uses `BattleCanvas.tsx` and `simulation.ts`.
-# batalha-naval
+The production build is generated in:
+
+```text
+dist/
+```
+
+## Controls
+
+### Keyboard
+
+| Key | Action |
+|---|---|
+| `W` | Move forward |
+| `A` | Turn left |
+| `D` | Turn right |
+| `J` | Fire front cannon |
+| `Q` | Fire port broadside |
+| `E` | Fire starboard broadside |
+| `Space` / `Esc` | Pause |
+
+The front cannon fires in the direction the ship is currently facing.
+
+The broadside cannons fire multiple projectiles from either side of the ship.
+
+### Mobile
+
+Touch controls are displayed when using the game on mobile devices and provide movement and weapon controls without requiring a keyboard.
+
+## Gameplay
+
+The goal is to survive the match while destroying enemy ships.
+
+Two primary enemy behaviors are implemented:
+
+### Chaser
+
+Moves toward the player and attempts to remain close enough to apply pressure.
+
+### Shooter
+
+Tries to maintain a useful combat position and attacks the player with ranged projectiles.
+
+Enemies continue spawning according to the configured spawn interval.
+
+The match ends when:
+
+- the game session timer reaches zero; or
+- the player ship is destroyed.
+
+The result is then recorded and displayed on the Result screen.
+
+## Configuration
+
+Gameplay options can be changed from the **Options** screen.
+
+Currently configurable settings include:
+
+- Game session time
+- Enemy spawn time
+
+The selected settings are persisted locally so they remain available after reloading the application.
+
+## Ranking
+
+The Ranking screen displays persisted match results using the simulated backend.
+
+The browser is assigned a persistent player identifier so matches created by the same installation can be associated with the same player.
+
+## Match History
+
+Match History displays previous matches belonging to the current player.
+
+Match data is persisted through the application's mocked API layer rather than being stored only inside the active game session.
+
+## Networking
+
+The networking layer is intentionally separated from the game implementation.
+
+It uses:
+
+- **Axios** for HTTP communication
+- **TanStack Query** for server-state management
+- **MSW** for the simulated backend
+- persistent fixtures for ranking and match data
+
+This allows the application to behave similarly to a frontend connected to a real backend while still remaining completely self-contained for the challenge.
+
+## Network Scenarios
+
+The project includes selectable network scenarios for testing different backend conditions.
+
+They can be changed through the application's network scenario controls.
+
+Scenarios are used to reproduce behavior such as:
+
+- normal responses
+- delayed responses
+- failed requests
+- timeout/retry situations
+- ordering-related response conditions
+
+The active scenario can also be reset back to the default state through the same controls.
+
+This was implemented so failure handling can be tested without changing application code or requiring an external backend.
+
+## Persistence
+
+The application persists relevant information locally, including:
+
+- player identity
+- gameplay options
+- match records
+- ranking data
+- mocked backend state
+
+Pending match writes are handled separately so interrupted requests can be recovered instead of silently losing the result.
+
+## Architecture
+
+The project is split between the React application layer and the PixiJS game layer.
+
+React is responsible for:
+
+- screens and navigation
+- configuration
+- ranking
+- match history
+- network state
+- result presentation
+
+PixiJS is responsible for:
+
+- rendering
+- the game loop
+- player movement
+- enemies
+- projectiles
+- collisions
+- particles
+- the game world
+
+The game exposes only the state required by the application instead of coupling React directly to internal gameplay systems.
+
+Additional implementation notes are available in:
+
+```text
+ARCHITECTURE.md
+```
+
+## Rendering
+
+The game uses an isometric-style projection and a larger world than the visible viewport.
+
+Rendering work is limited to the relevant visible region where possible so the game does not need to render the entire map every frame.
+
+Ships use multiple directional sprites to avoid visually rotating a single flat image and to preserve the intended isometric appearance.
+
+Particle effects are used for movement and combat feedback.
+
+## Testing
+
+The repository contains automated tests covering application and game behavior, including unit/integration tests and browser-level tests.
+
+The exact available commands can be listed with:
+
+```bash
+npm run
+```
+
+The project should always pass a production build before submission:
+
+```bash
+npm run build
+```
+
+The deployed production version can also be tested directly at:
+
+https://pirate-battle-omega.vercel.app
+
+## Mock Service Worker
+
+MSW is initialized using:
+
+```text
+public/mockServiceWorker.js
+```
+
+Because the application uses Vite's base URL when registering the worker, the same configuration works in both local development and the deployed production build.
+
+## Technical Decisions
+
+The implementation intentionally keeps the game and application infrastructure relatively simple.
+
+The main goals were:
+
+- keep gameplay logic isolated from React
+- avoid unnecessary abstractions
+- keep network behavior replaceable
+- make backend failure cases reproducible
+- preserve predictable gameplay behavior
+- keep rendering appropriate for a browser-based PixiJS game
+
+Several systems use intentionally straightforward implementations rather than introducing additional frameworks or complex architecture for a small challenge project.
+
+## Known Limitations
+
+- Audio is not currently implemented.
+- Collision geometry is intentionally simpler than the rendered shapes.
+- The project does not include the complete three-minute profiling report described in the challenge specification.
+- Small rendering differences may occur between operating systems, browsers and GPU configurations.
+
+## Stack
+
+- React
+- TypeScript
+- PixiJS
+- Vite
+- Axios
+- TanStack Query
+- MSW
+- Playwright
+- Vitest
+
+## Repository
+
+https://github.com/PedroGeometrias/batalha-naval
