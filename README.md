@@ -1,4 +1,4 @@
-# Pirate Battle
+[# Pirate Battle
 
 A small naval combat game built with **React, TypeScript and PixiJS** for the Jungle Gaming Frontend Game Developer challenge.
 
@@ -291,3 +291,4 @@ Several systems use intentionally straightforward implementations rather than in
 ## Repository
 
 https://github.com/PedroGeometrias/batalha-naval
+](http://localhost:4174/)
