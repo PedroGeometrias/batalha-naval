@@ -276,13 +276,6 @@ The main goals were:
 
 Several systems use intentionally straightforward implementations rather than introducing additional frameworks or complex architecture for a small challenge project.
 
-## Known Limitations
-
-- Audio is not currently implemented.
-- Collision geometry is intentionally simpler than the rendered shapes.
-- The project does not include the complete three-minute profiling report described in the challenge specification.
-- Small rendering differences may occur between operating systems, browsers and GPU configurations.
-
 ## Stack
 
 - React
